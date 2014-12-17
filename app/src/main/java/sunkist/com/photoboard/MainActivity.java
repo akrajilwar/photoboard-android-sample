@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.text.format.DateFormat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -35,6 +36,8 @@ import com.squareup.okhttp.Response;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Locale;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -160,9 +163,15 @@ public class MainActivity extends ActionBarActivity {
                     .animate(R.anim.abc_fade_in)
                     .into(imageView);
 
-            textView.setText(photo.created_at);
+            textView.setText(getDateString(Long.parseLong(photo.created_at) * 1000L));
 
             return convertView;
+        }
+
+        String getDateString(long timestamp) {
+            Calendar calendar = Calendar.getInstance(Locale.ENGLISH);
+            calendar.setTimeInMillis(timestamp);
+            return DateFormat.format("yyyy-MM-dd", calendar).toString();
         }
     }
 
