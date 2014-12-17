@@ -3,6 +3,7 @@
 
     <string name="app_name">PhotoBoard</string>
     <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_refresh">새로고침</string>
+    <string name="action_settings">설정</string>
 
 </resources>
