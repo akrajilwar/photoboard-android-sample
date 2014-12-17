@@ -1,10 +1,13 @@
 package sunkist.com.photoboard;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
@@ -14,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -46,12 +50,16 @@ public class MainActivity extends ActionBarActivity {
     final static int TAKE_CAMERA = 1;
     final static int TAKE_GALLERY = 2;
 
+    ProgressDialog pendingDialog = null;
     PhotoArrayAdapter photoArrayAdapter = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        pendingDialog = new ProgressDialog(this);
+        pendingDialog.setIndeterminate(true);
 
         GridView gridView = (GridView) findViewById(R.id.gridView);
         photoArrayAdapter = new PhotoArrayAdapter(this);
@@ -65,6 +73,11 @@ public class MainActivity extends ActionBarActivity {
     }
 
     class LoadTask extends ApiTask {
+        @Override
+        protected void onPreExecute() {
+            pendingDialog.show();
+        }
+
         @Override
         protected Object doInBackground(String... urls) {
             Object result = super.doInBackground(urls);
@@ -100,6 +113,7 @@ public class MainActivity extends ActionBarActivity {
         protected void onPostExecute(Object result) {
             photoArrayAdapter.clear();
             photoArrayAdapter.addAll((ArrayList<Photo>) result);
+            pendingDialog.hide();
         }
     }
 
@@ -108,6 +122,11 @@ public class MainActivity extends ActionBarActivity {
 
         public UploadTask(byte[] fileData) {
             this.fileData = fileData;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            pendingDialog.show();
         }
 
         @Override
@@ -125,6 +144,8 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         protected void onPostExecute(Object result) {
+            pendingDialog.hide();
+
             int statusCode = 0;
             if (result != null) {
                 Response response = (Response) result;
@@ -133,8 +154,6 @@ public class MainActivity extends ActionBarActivity {
                     toast("업로드 성공");
                     load();
                     return;
-                }
-                else {
                 }
             }
             toast(String.format("업로드 실패 (%d)", statusCode));
