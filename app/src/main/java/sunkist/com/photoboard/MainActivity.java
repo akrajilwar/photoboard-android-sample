@@ -1,6 +1,12 @@
 package sunkist.com.photoboard;
 
 import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -19,8 +25,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.squareup.okhttp.Headers;
+import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.MultipartBuilder;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -28,6 +40,9 @@ import java.util.ArrayList;
 public class MainActivity extends ActionBarActivity {
 
     final static String HOST = "http://conductive-set-796.appspot.com";
+    final static int TAKE_CAMERA = 1;
+    final static int TAKE_GALLERY = 2;
+
     PhotoArrayAdapter photoArrayAdapter = null;
 
     @Override
@@ -85,6 +100,45 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
+    class UploadTask extends ApiTask {
+        byte[] fileData;
+
+        public UploadTask(byte[] fileData) {
+            this.fileData = fileData;
+        }
+
+        @Override
+        public Request.Builder getBuilder(String url) {
+            MediaType mediaType = MediaType.parse("image/jpeg");
+
+            RequestBody requestBody =  new MultipartBuilder()
+                    .type(MultipartBuilder.FORM)
+                    .addFormDataPart("file", "file.jpg", RequestBody.create(mediaType, fileData))
+                    .build();
+
+            Request.Builder builder = super.getBuilder(url);
+            return builder.post(requestBody);
+        }
+
+        @Override
+        protected void onPostExecute(Object result) {
+            int statusCode = 0;
+            if (result != null) {
+                Response response = (Response) result;
+                statusCode = response.code();
+                if (statusCode == 200) {
+                    toast("업로드 성공");
+                    load();
+                    return;
+                }
+                else {
+                }
+            }
+            toast(String.format("업로드 실패 (%d)", statusCode));
+            return;
+        }
+    }
+
     class PhotoArrayAdapter extends ArrayAdapter<Photo> {
         public PhotoArrayAdapter(Context context) {
             super(context, 0);
@@ -126,15 +180,54 @@ public class MainActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if ( id == R.id.action_refresh ) {
-            load();
+        if ( id == R.id.action_upload ) {
+            Intent intent = new Intent();
+            intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
+            startActivityForResult(intent, TAKE_CAMERA);
+            return true;
         }
+        else if ( id == R.id.action_refresh ) {
+            load();
+            return true;
+        }
+        /*
         else if ( id == R.id.action_settings ) {
             toast("TODO: 설정");
             return true;
         }
+        */
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if ( resultCode == RESULT_OK ) {
+            if ( requestCode == TAKE_CAMERA ) {
+                Uri imageUri = data.getData();
+                String path = getRealPathFromUri(imageUri);
+
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                Bitmap bitmap = BitmapFactory.decodeFile(path, options);
+
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 60, stream) ;
+                byte[] bitmapData = stream.toByteArray();
+
+                toast(String.format("load %d bytes", bitmapData.length));
+
+                new UploadTask(bitmapData).execute(HOST + "/new");
+            }
+        }
+    }
+
+    String getRealPathFromUri(Uri contentUri) {
+        String[] proj = { MediaStore.Images.Media.DATA };
+        Cursor cursor = managedQuery(contentUri, proj, null, null, null);
+        int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        return cursor.getString(columnIndex);
     }
 
     void toast(String message) {

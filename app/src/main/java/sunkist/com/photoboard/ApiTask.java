@@ -12,13 +12,16 @@ import java.io.IOException;
 class ApiTask extends AsyncTask<String, Void, Object> {
     OkHttpClient client = new OkHttpClient();
 
+    public Request.Builder getBuilder(String url) {
+        return new Request.Builder()
+                .url(url)
+                .addHeader("Accept", "application/json");
+    }
+
     @Override
     protected Object doInBackground(String... urls) {
         String url = urls[0];
-        Request request = new Request.Builder()
-                .url(url)
-                .addHeader("Accept", "application/json")
-                .build();
+        Request request = getBuilder(url).build();
         Object response = null;
         try {
             response = client.newCall(request).execute();
