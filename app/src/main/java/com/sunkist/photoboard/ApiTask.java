@@ -1,4 +1,4 @@
-package sunkist.com.photoboard;
+package com.sunkist.photoboard;
 
 import android.os.AsyncTask;
 
