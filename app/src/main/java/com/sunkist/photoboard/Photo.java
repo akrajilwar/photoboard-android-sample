@@ -1,6 +1,9 @@
 package com.sunkist.photoboard;
 
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 public class Photo {
     String image_url;
     String created_at;

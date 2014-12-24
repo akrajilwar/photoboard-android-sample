@@ -1,7 +1,9 @@
 package com.sunkist.photoboard;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -13,11 +15,13 @@ import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -65,7 +69,24 @@ public class MainActivity extends ActionBarActivity {
         photoArrayAdapter = new PhotoArrayAdapter(this);
         gridView.setAdapter(photoArrayAdapter);
 
+        final Context context = this;
+
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Photo photo = (Photo) parent.getAdapter().getItem(position);
+                Intent intent = new Intent(context, DetailActivity.class);
+                intent.putExtra("imageUrl", HOST + photo.image_url);
+                startActivity(intent);
+            }
+        });
+
         load();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     void load() {
@@ -209,9 +230,26 @@ public class MainActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         if ( id == R.id.action_upload ) {
-            Intent intent = new Intent();
-            intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
-            startActivityForResult(intent, TAKE_CAMERA);
+            String[] rows = { "사진촬영", "앨범" };
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, rows);
+            AlertDialog alertDialog = new AlertDialog.Builder(this)
+                    .setAdapter(adapter, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if ( which == 0 ) {
+                                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                                startActivityForResult(intent, TAKE_CAMERA);
+                            }
+                            else {
+                                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                                startActivityForResult(intent, TAKE_GALLERY);
+                            }
+                        }
+                    })
+                    .create();
+            alertDialog.setCanceledOnTouchOutside(true);
+            alertDialog.show();
+
             return true;
         }
         else if ( id == R.id.action_refresh ) {
@@ -231,7 +269,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if ( resultCode == RESULT_OK ) {
-            if ( requestCode == TAKE_CAMERA ) {
+            if ( requestCode == TAKE_CAMERA || requestCode == TAKE_GALLERY ) {
                 Uri imageUri = data.getData();
                 String path = getRealPathFromUri(imageUri);
 
