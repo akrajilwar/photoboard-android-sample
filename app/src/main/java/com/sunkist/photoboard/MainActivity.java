@@ -53,6 +53,7 @@ public class MainActivity extends ActionBarActivity {
     final static String HOST = "http://conductive-set-796.appspot.com";
     final static int TAKE_CAMERA = 1;
     final static int TAKE_GALLERY = 2;
+    final static int TAKE_CUSTOM_GALLERY = 3;
 
     ProgressDialog pendingDialog = null;
     PhotoArrayAdapter photoArrayAdapter = null;
@@ -230,7 +231,7 @@ public class MainActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         if ( id == R.id.action_upload ) {
-            String[] rows = { "사진촬영", "앨범" };
+            String[] rows = { "사진촬영", "앨범", "커스텀 갤러리" };
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, rows);
             AlertDialog alertDialog = new AlertDialog.Builder(this)
                     .setAdapter(adapter, new DialogInterface.OnClickListener() {
@@ -240,9 +241,13 @@ public class MainActivity extends ActionBarActivity {
                                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                                 startActivityForResult(intent, TAKE_CAMERA);
                             }
-                            else {
+                            else if ( which == 1 ) {
                                 Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                                 startActivityForResult(intent, TAKE_GALLERY);
+                            }
+                            else {
+                                Intent intent = new Intent(MainActivity.this, GalleryActivity.class);
+                                startActivityForResult(intent, TAKE_CUSTOM_GALLERY);
                             }
                         }
                     })
@@ -267,10 +272,10 @@ public class MainActivity extends ActionBarActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if ( resultCode == RESULT_OK ) {
-            if ( requestCode == TAKE_CAMERA || requestCode == TAKE_GALLERY ) {
-                Uri imageUri = data.getData();
+            if ( requestCode == TAKE_CAMERA || requestCode == TAKE_GALLERY || requestCode == TAKE_CUSTOM_GALLERY ) {
+                Uri imageUri = intent.getData();
                 String path = getRealPathFromUri(imageUri);
 
                 BitmapFactory.Options options = new BitmapFactory.Options();
