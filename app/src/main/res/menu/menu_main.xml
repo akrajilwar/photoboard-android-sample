@@ -10,6 +10,10 @@
         android:title="@string/action_refresh"
         app:showAsAction="always" />
 
+    <item android:id="@+id/action_contacts"
+        android:title="@string/action_contacts"
+        app:showAsAction="always" />
+
     <!--
     <item android:id="@+id/action_settings"
         android:title="@string/action_settings"
