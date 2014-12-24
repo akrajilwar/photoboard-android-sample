@@ -261,6 +261,11 @@ public class MainActivity extends ActionBarActivity {
             load();
             return true;
         }
+        else if ( id == R.id.action_contacts ) {
+            Intent intent = new Intent(this, ContactsActivity.class);
+            startActivity(intent);
+            return true;
+        }
         /*
         else if ( id == R.id.action_settings ) {
             toast("TODO: 설정");
