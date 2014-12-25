@@ -4,6 +4,7 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore.Images;
@@ -15,6 +16,7 @@ import android.widget.AdapterView;
 import android.widget.CursorAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -23,7 +25,15 @@ import java.util.Calendar;
 import java.util.Locale;
 
 
-public class GalleryActivity extends ActionBarActivity {
+// http://wptrafficanalyzer.in/blog/loading-listview-with-sdcard-thumbnail-images-and-displaying-its-title-size-width-and-height-by-merging-cursors-using-matrixcursor/
+
+public class GallerySimpleActivity extends ActionBarActivity {
+    SimpleCursorAdapter adapter;
+    MatrixCursor matrixCursor;
+    Cursor thumbCursor;
+    Cursor imageCursor;
+    String thumbImageId = "";
+    String thumbImageData = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,11 +41,6 @@ public class GalleryActivity extends ActionBarActivity {
         setContentView(R.layout.activity_gallery);
 
         GridView gridView = (GridView) findViewById(R.id.gridView);
-        Cursor cursor = getContentResolver().query(Images.Media.EXTERNAL_CONTENT_URI,
-            null, null, null, null);
-        GalleryAdapter adapter = new GalleryAdapter(this, cursor);
-        gridView.setAdapter(adapter);
-
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -49,6 +54,11 @@ public class GalleryActivity extends ActionBarActivity {
                 finish();
             }
         });
+
+        Cursor cursor = getContentResolver().query(Images.Media.EXTERNAL_CONTENT_URI,
+                null, null, null, null);
+        GalleryAdapter adapter = new GalleryAdapter(this, cursor);
+        gridView.setAdapter(adapter);
     }
 
     class Photo {

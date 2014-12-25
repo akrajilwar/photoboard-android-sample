@@ -8,19 +8,15 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
@@ -34,7 +30,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.squareup.okhttp.Headers;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.MultipartBuilder;
 import com.squareup.okhttp.Request;
@@ -54,6 +49,7 @@ public class MainActivity extends ActionBarActivity {
     final static int TAKE_CAMERA = 1;
     final static int TAKE_GALLERY = 2;
     final static int TAKE_CUSTOM_GALLERY = 3;
+    final static int TAKE_CUSTOM_LOADER_MANAGER_GALLERY = 4;
 
     ProgressDialog pendingDialog = null;
     PhotoArrayAdapter photoArrayAdapter = null;
@@ -231,7 +227,7 @@ public class MainActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         if ( id == R.id.action_upload ) {
-            String[] rows = { "사진촬영", "앨범", "커스텀 갤러리" };
+            String[] rows = { "사진촬영", "앨범", "커스텀 갤러리", "커스텀 갤러리 (Loader Manager)" };
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, rows);
             AlertDialog alertDialog = new AlertDialog.Builder(this)
                     .setAdapter(adapter, new DialogInterface.OnClickListener() {
@@ -245,9 +241,13 @@ public class MainActivity extends ActionBarActivity {
                                 Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                                 startActivityForResult(intent, TAKE_GALLERY);
                             }
-                            else {
-                                Intent intent = new Intent(MainActivity.this, GalleryActivity.class);
+                            else if ( which == 2 ) {
+                                Intent intent = new Intent(MainActivity.this, GallerySimpleActivity.class);
                                 startActivityForResult(intent, TAKE_CUSTOM_GALLERY);
+                            }
+                            else {
+                                Intent intent = new Intent(MainActivity.this, GalleryLoaderManagerActivity.class);
+                                startActivityForResult(intent, TAKE_CUSTOM_LOADER_MANAGER_GALLERY);
                             }
                         }
                     })
@@ -279,7 +279,8 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if ( resultCode == RESULT_OK ) {
-            if ( requestCode == TAKE_CAMERA || requestCode == TAKE_GALLERY || requestCode == TAKE_CUSTOM_GALLERY ) {
+            if ( requestCode == TAKE_CAMERA || requestCode == TAKE_GALLERY ||
+                    requestCode == TAKE_CUSTOM_GALLERY || requestCode == TAKE_CUSTOM_LOADER_MANAGER_GALLERY ) {
                 Uri imageUri = intent.getData();
                 String path = getRealPathFromUri(imageUri);
 

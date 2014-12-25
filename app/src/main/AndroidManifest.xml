@@ -24,7 +24,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".DetailActivity" />
-        <activity android:name=".GalleryActivity" />
+        <activity android:name=".GallerySimpleActivity" />
+        <activity android:name=".GalleryLoaderManagerActivity" />
         <activity android:name=".ContactsActivity" />
     </application>
 
