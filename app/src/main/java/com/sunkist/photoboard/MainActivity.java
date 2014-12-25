@@ -88,10 +88,9 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-        float scalefactor = getResources().getDisplayMetrics().density * 100;
+        float scalefactor = getResources().getDisplayMetrics().density * 120;
         int number = getWindowManager().getDefaultDisplay().getWidth();
         int numColumns = (int) ((float) number / (float) scalefactor);
-        // int numColumns = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE ? 4 : 3;
         gridView.setNumColumns(numColumns);
         Toast.makeText(this, "numColumns : " + numColumns, Toast.LENGTH_SHORT).show();
         super.onConfigurationChanged(newConfig);
@@ -207,7 +206,7 @@ public class MainActivity extends ActionBarActivity {
             }
 
             ImageView imageView = (ImageView) convertView.findViewById(R.id.imageView);
-            TextView textView = (TextView) convertView.findViewById(R.id.textView);
+            // TextView textView = (TextView) convertView.findViewById(R.id.textView);
 
             Photo photo = getItem(position);
 
@@ -216,7 +215,7 @@ public class MainActivity extends ActionBarActivity {
                     .animate(R.anim.abc_fade_in)
                     .into(imageView);
 
-            textView.setText(getDateString(Long.parseLong(photo.created_at) * 1000L));
+            // textView.setText(getDateString(Long.parseLong(photo.created_at) * 1000L));
 
             return convertView;
         }
