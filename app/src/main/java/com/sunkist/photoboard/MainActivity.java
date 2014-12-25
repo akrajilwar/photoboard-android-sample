@@ -5,6 +5,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -51,6 +53,7 @@ public class MainActivity extends ActionBarActivity {
     final static int TAKE_CUSTOM_GALLERY = 3;
     final static int TAKE_CUSTOM_LOADER_MANAGER_GALLERY = 4;
 
+    GridView gridView = null;
     ProgressDialog pendingDialog = null;
     PhotoArrayAdapter photoArrayAdapter = null;
 
@@ -62,7 +65,7 @@ public class MainActivity extends ActionBarActivity {
         pendingDialog = new ProgressDialog(this);
         pendingDialog.setIndeterminate(true);
 
-        GridView gridView = (GridView) findViewById(R.id.gridView);
+        gridView = (GridView) findViewById(R.id.gridView);
         photoArrayAdapter = new PhotoArrayAdapter(this);
         gridView.setAdapter(photoArrayAdapter);
 
@@ -78,7 +81,20 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
+        onConfigurationChanged(Resources.getSystem().getConfiguration());
+
         load();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        float scalefactor = getResources().getDisplayMetrics().density * 100;
+        int number = getWindowManager().getDefaultDisplay().getWidth();
+        int numColumns = (int) ((float) number / (float) scalefactor);
+        // int numColumns = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE ? 4 : 3;
+        gridView.setNumColumns(numColumns);
+        Toast.makeText(this, "numColumns : " + numColumns, Toast.LENGTH_SHORT).show();
+        super.onConfigurationChanged(newConfig);
     }
 
     @Override
