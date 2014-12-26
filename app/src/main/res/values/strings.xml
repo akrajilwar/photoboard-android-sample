@@ -6,6 +6,7 @@
     <string name="action_upload">업로드</string>
     <string name="action_refresh">새로고침</string>
     <string name="action_contacts">연락처</string>
+    <string name="action_jni">jni 테스트</string>
     <string name="action_settings">설정</string>
 
 </resources>

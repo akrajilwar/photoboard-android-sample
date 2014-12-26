@@ -51,6 +51,10 @@ import java.util.Map;
 
 public class MainActivity extends ActionBarActivity {
 
+    static {
+        System.loadLibrary("helloNdk");
+    }
+
     final static String HOST = "http://conductive-set-796.appspot.com";
     final static int TAKE_CAMERA = 1;
     final static int TAKE_GALLERY = 2;
@@ -285,6 +289,9 @@ public class MainActivity extends ActionBarActivity {
             startActivity(intent);
             return true;
         }
+        else if ( id == R.id.action_jni ) {
+            Toast.makeText(this, getStringFromNative(), Toast.LENGTH_SHORT).show();
+        }
         /*
         else if ( id == R.id.action_settings ) {
             toast("TODO: 설정");
@@ -329,4 +336,6 @@ public class MainActivity extends ActionBarActivity {
     void toast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
+
+    public native String getStringFromNative();
 }
