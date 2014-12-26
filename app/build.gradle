@@ -13,6 +13,11 @@ android {
 
         ndk {
             moduleName "helloNdk"
+            // other options
+            // cFlags "-DANDROID_NDK -D_DEBUG -DNULL=0" // define some macros
+            // ldLibs "EGL", "GLESv3", "dl", "log"      // Link with these libraries!!!
+            // stl "stlport_static"                     // (ie: gnustl_shared, stlport_static …)
+
         }
     }
 
