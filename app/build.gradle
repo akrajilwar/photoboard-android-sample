@@ -1,5 +1,8 @@
 apply plugin: 'com.android.application'
 
+// http://tools.android.com/tech-docs/new-build-system/user-guide
+// http://www.gradle.org/docs/current/dsl/
+
 android {
     compileSdkVersion Integer.parseInt(project.ANDROID_BUILD_SDK_VERSION)
     buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION
@@ -17,9 +20,62 @@ android {
             // cFlags "-DANDROID_NDK -D_DEBUG -DNULL=0" // define some macros
             // ldLibs "EGL", "GLESv3", "dl", "log"      // Link with these libraries!!!
             // stl "stlport_static"                     // (ie: gnustl_shared, stlport_static …)
-
         }
     }
+
+
+    flavorDimensions "abi", "grade" // Multi-flavor variants
+
+    // IMPORTANT : Android Library Project 는 productFlavors 를 지원하지 않습니다.
+    productFlavors {
+        x86 {
+            flavorDimension "abi"
+            ndk { abiFilter "x86" }
+            // this is the flavor part of the version code.
+            // It must be higher than the arm one for device supporting both, as x86 is preferred.
+            versionCode 3
+        }
+        arm {
+            flavorDimension "abi"
+            ndk { abiFilter "armeabi-v7a" }
+            versionCode 1
+        }
+        mips {
+            flavorDimension "abi"
+            // It must be higher than the arm one for devices supporting both, as mips is preferred.
+            ndk { abiFilter "mips" }
+            versionCode 2
+        }
+        fat {
+            flavorDimension "abi"
+            // fat binary, lowest version code to be the last option
+            versionCode 0
+        }
+
+        free {
+            flavorDimension "grade"
+            applicationId "com.android.tests.flavored.free"
+            versionName "2.0.0-free"
+            versionCode 1
+        }
+        paid {
+            flavorDimension "grade"
+            applicationId "com.android.tests.flavored.paid"
+            versionName "1.0.0-paid"
+            versionCode 2
+        }
+    }
+
+    // DomainObjectCollection : http://www.gradle.org/docs/current/javadoc/org/gradle/api/DomainObjectCollection.html
+    applicationVariants.all { variant ->
+        // get the version code of each flavor
+        def abiVersion = variant.productFlavors.get(0).versionCode
+        def versionVersion = variant.productFlavors.get(1).versionCode
+
+        // set the composite code
+        variant.mergedFlavor.versionCode = abiVersion * 1000000 + versionVersion * 100000 + defaultConfig.versionCode
+    }
+
 
     buildTypes {
         release {
